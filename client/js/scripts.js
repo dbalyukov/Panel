@@ -4,6 +4,7 @@
 const API_BASE_URL = '/api'; // Используем относительный путь
 const AUTH_ENDPOINT = `${API_BASE_URL}/auth/login`;
 const USERS_ENDPOINT = `${API_BASE_URL}/users`;
+const REQUEST_TIMEOUT = 10000; // 10 секунд
 
 // DOM элементы
 const authForm = document.getElementById('authForm');
@@ -29,6 +30,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ==================== АВТОРИЗАЦИЯ ====================
 
+// Функция для выполнения запросов с таймаутом
+async function fetchWithTimeout(url, options = {}) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+
+    try {
+        const response = await fetch(url, {
+            ...options,
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        return response;
+    } catch (error) {
+        clearTimeout(timeoutId);
+        if (error.name === 'AbortError') {
+            throw new Error('Превышено время ожидания ответа от сервера');
+        }
+        throw error;
+    }
+}
+
 async function handleLogin() {
     const login = loginInput.value.trim();
     const password = passwordInput.value.trim();
@@ -39,7 +61,8 @@ async function handleLogin() {
     }
 
     try {
-        const response = await fetch(AUTH_ENDPOINT, {
+        showLoader();
+        const response = await fetchWithTimeout(AUTH_ENDPOINT, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -59,8 +82,10 @@ async function handleLogin() {
         await loadAndRenderUsers();
     } catch (error) {
         console.error('Ошибка авторизации:', error);
-        showAuthError(error.message);
+        showAuthError(error.message || 'Ошибка сети. Проверьте подключение к интернету.');
         passwordInput.value = '';
+    } finally {
+        hideLoader();
     }
 }
 
@@ -112,13 +137,17 @@ async function loadAndRenderUsers() {
 }
 
 async function fetchUsers() {
-    const response = await fetch(USERS_ENDPOINT, {
+    const response = await fetchWithTimeout(USERS_ENDPOINT, {
         headers: {
             'Authorization': `Bearer ${authToken}`
         }
     });
 
     if (!response.ok) {
+        if (response.status === 401) {
+            handleLogout();
+            throw new Error('Сессия истекла. Пожалуйста, войдите снова.');
+        }
         throw new Error(await response.text());
     }
 
@@ -210,11 +239,17 @@ function escapeHtml(unsafe) {
 }
 
 function showLoader() {
-    // Реализация индикатора загрузки
+    const loader = document.createElement('div');
+    loader.className = 'loader';
+    loader.innerHTML = '<div class="spinner"></div>';
+    document.body.appendChild(loader);
 }
 
 function hideLoader() {
-    // Скрытие индикатора загрузки
+    const loader = document.querySelector('.loader');
+    if (loader) {
+        loader.remove();
+    }
 }
 
 function showError(message) {
