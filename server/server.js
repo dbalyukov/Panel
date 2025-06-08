@@ -14,6 +14,9 @@ app.use(cors());
 app.use(express.json());
 app.use(helmet());
 
+// Serve static files
+app.use(express.static('client'));
+
 // Лимитер запросов
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 минут
@@ -31,7 +34,15 @@ app.get('/health', (req, res) => res.sendStatus(200));
 // Error handling
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ error: 'Something broke!' });
+  if (err.name === 'UnauthorizedError') {
+    return res.status(401).json({ error: 'Неверные учетные данные' });
+  }
+  res.status(500).json({ error: 'Внутренняя ошибка сервера' });
+});
+
+// Handle 404
+app.use((req, res) => {
+  res.status(404).json({ error: 'Страница не найдена' });
 });
 
 // Обработка необработанных исключений

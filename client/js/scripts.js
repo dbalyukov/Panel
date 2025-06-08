@@ -67,7 +67,7 @@ async function handleLogin() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ login, password })
+            body: JSON.stringify({ email: login, password })
         });
 
         if (!response.ok) {
