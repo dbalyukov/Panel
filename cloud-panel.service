@@ -1,0 +1,14 @@
+[Unit]
+Description=Cloud Panel Node.js Application
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/cloud-panel
+ExecStart=/usr/bin/npm start
+Restart=on-failure
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target 
