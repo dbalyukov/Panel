@@ -387,10 +387,81 @@ async function loadAndRenderUserSettings() {
                     </tr>
                   </tbody>
                 </table>
+                <button class="btn btn-outline" id="showChangePasswordFormBtn" style="margin-top:20px;">Сменить пароль</button>
+                <div id="changePasswordFormContainer"></div>
             </div>
         `;
+        // Навешиваем обработчик на кнопку смены пароля
+        document.getElementById('showChangePasswordFormBtn').addEventListener('click', renderChangePasswordForm);
     } catch (error) {
         dynamicContent.innerHTML = `<div class="alert alert-danger">${escapeHtml(error.message || 'Ошибка загрузки данных пользователя')}</div>`;
+    } finally {
+        hideLoader();
+    }
+}
+
+function renderChangePasswordForm() {
+    const container = document.getElementById('changePasswordFormContainer');
+    container.innerHTML = `
+        <form id="changePasswordForm" class="change-password-form">
+            <div class="form-group">
+                <label for="oldPassword">Старый пароль</label>
+                <input type="password" id="oldPassword" class="form-control" required autocomplete="current-password">
+            </div>
+            <div class="form-group">
+                <label for="newPassword">Новый пароль</label>
+                <input type="password" id="newPassword" class="form-control" required autocomplete="new-password">
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Подтвердите новый пароль</label>
+                <input type="password" id="confirmPassword" class="form-control" required autocomplete="new-password">
+            </div>
+            <button type="submit" class="btn btn-primary">Изменить пароль</button>
+            <div id="changePasswordMessage" style="margin-top:10px;"></div>
+        </form>
+    `;
+    document.getElementById('changePasswordForm').addEventListener('submit', handleChangePasswordSubmit);
+}
+
+async function handleChangePasswordSubmit(e) {
+    e.preventDefault();
+    const oldPassword = document.getElementById('oldPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const messageDiv = document.getElementById('changePasswordMessage');
+    messageDiv.textContent = '';
+    messageDiv.className = '';
+
+    if (newPassword !== confirmPassword) {
+        messageDiv.textContent = 'Новые пароли не совпадают';
+        messageDiv.className = 'alert alert-danger';
+        return;
+    }
+    if (newPassword.length < 6) {
+        messageDiv.textContent = 'Пароль должен быть не короче 6 символов';
+        messageDiv.className = 'alert alert-danger';
+        return;
+    }
+    try {
+        showLoader();
+        const response = await fetchWithTimeout('/api/users/change-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ oldPassword, newPassword })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || 'Ошибка смены пароля');
+        }
+        messageDiv.textContent = 'Пароль успешно изменён!';
+        messageDiv.className = 'alert alert-success';
+        document.getElementById('changePasswordForm').reset();
+    } catch (error) {
+        messageDiv.textContent = error.message || 'Ошибка смены пароля';
+        messageDiv.className = 'alert alert-danger';
     } finally {
         hideLoader();
     }

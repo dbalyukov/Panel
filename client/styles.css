@@ -707,3 +707,30 @@ body {
 .user-profile-table tr:last-child td {
     border-bottom: none;
 }
+
+.change-password-form {
+    margin-top: 24px;
+    max-width: 400px;
+}
+.change-password-form .form-group {
+    margin-bottom: 16px;
+}
+.change-password-form label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+.change-password-form .form-control {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 14px;
+    color: var(--text-primary);
+    background-color: var(--bg-white);
+}
+.change-password-form .btn-primary {
+    width: 100%;
+    margin-top: 8px;
+}
