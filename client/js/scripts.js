@@ -389,12 +389,273 @@ async function loadAndRenderUserSettings() {
                   </tbody>
                 </table>
                 <button class="btn btn-outline" id="showChangePasswordFormBtn" style="margin-top:20px;">Сменить пароль</button>
+                <button class="btn btn-primary" id="showUsersListBtn" style="margin-top:20px; margin-left:12px;">Отобразить список пользователей</button>
             </div>
         `;
-        // Навешиваем обработчик на кнопку смены пароля
         document.getElementById('showChangePasswordFormBtn').addEventListener('click', openChangePasswordModal);
+        document.getElementById('showUsersListBtn').addEventListener('click', showUsersListPage);
     } catch (error) {
         dynamicContent.innerHTML = `<div class="alert alert-danger">${escapeHtml(error.message || 'Ошибка загрузки данных пользователя')}</div>`;
+    } finally {
+        hideLoader();
+    }
+}
+
+async function showUsersListPage() {
+    const dynamicContent = document.getElementById('dynamicContent');
+    try {
+        showLoader();
+        const response = await fetchWithTimeout('/api/users', {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        if (!response.ok) {
+            if (response.status === 401) {
+                handleLogout();
+                throw new Error('Сессия истекла. Пожалуйста, войдите снова.');
+            }
+            throw new Error(await response.text());
+        }
+        const users = await response.json();
+        dynamicContent.innerHTML = `
+            <div class="card">
+                <div class="card-title">Список пользователей</div>
+                <div style="margin-bottom: 16px; display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button class="btn btn-primary" id="addUserBtn">Добавить пользователя</button>
+                    <button class="btn btn-outline" id="backToSettingsBtn">Вернуться к настройкам пользователя</button>
+                </div>
+                <table class="user-profile-table">
+                  <thead>
+                    <tr>
+                      <th>Имя</th>
+                      <th>Email</th>
+                      <th>Роль</th>
+                      <th>Создан</th>
+                      <th>Обновлён</th>
+                      <th>Действия</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${users.map(u => `
+                      <tr data-user-id="${u.id}">
+                        <td>${escapeHtml(u.name)}</td>
+                        <td>${escapeHtml(u.email)}</td>
+                        <td>${escapeHtml(u.role)}</td>
+                        <td>${escapeHtml(new Date(u.created_at).toLocaleString())}</td>
+                        <td>${escapeHtml(new Date(u.updated_at).toLocaleString())}</td>
+                        <td>
+                          <button class="btn btn-sm btn-edit-user">Изменить</button>
+                          <button class="btn btn-sm btn-delete-user">Удалить</button>
+                        </td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+            </div>
+        `;
+        document.getElementById('addUserBtn').addEventListener('click', openAddUserModal);
+        document.getElementById('backToSettingsBtn').addEventListener('click', loadAndRenderUserSettings);
+        // Делегируем обработку кнопок "Изменить" и "Удалить"
+        dynamicContent.querySelector('tbody').addEventListener('click', handleUserTableActions);
+    } catch (error) {
+        dynamicContent.innerHTML = `<div class="alert alert-danger">${escapeHtml(error.message || 'Ошибка загрузки пользователей')}</div>`;
+    } finally {
+        hideLoader();
+    }
+}
+
+function handleUserTableActions(e) {
+    const tr = e.target.closest('tr[data-user-id]');
+    if (!tr) return;
+    const userId = tr.getAttribute('data-user-id');
+    if (e.target.classList.contains('btn-edit-user')) {
+        openEditUserModal(userId);
+    } else if (e.target.classList.contains('btn-delete-user')) {
+        deleteUser(userId);
+    }
+}
+
+function openAddUserModal() {
+    const modal = document.getElementById('changePasswordModal');
+    const modalBody = document.getElementById('changePasswordModalBody');
+    modal.classList.remove('hidden');
+    modalBody.innerHTML = `
+        <form id="addUserForm" class="change-password-form">
+            <div class="form-group">
+                <label for="addUserName">Имя</label>
+                <input type="text" id="addUserName" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="addUserEmail">Email</label>
+                <input type="email" id="addUserEmail" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="addUserRole">Роль</label>
+                <select id="addUserRole" class="form-control" required>
+                    <option value="">Выберите роль</option>
+                    <option value="Администратор">Администратор</option>
+                    <option value="Редактор">Редактор</option>
+                    <option value="Гость">Гость</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="addUserPassword">Пароль</label>
+                <input type="password" id="addUserPassword" class="form-control" required autocomplete="new-password">
+            </div>
+            <button type="submit" class="btn btn-primary">Добавить</button>
+            <div id="addUserMessage" style="margin-top:10px;"></div>
+        </form>
+    `;
+    document.getElementById('addUserForm').addEventListener('submit', handleAddUserSubmit);
+    document.getElementById('closeChangePasswordModal').onclick = closeChangePasswordModal;
+    modal.querySelector('.modal-backdrop').onclick = closeChangePasswordModal;
+}
+
+async function handleAddUserSubmit(e) {
+    e.preventDefault();
+    const name = document.getElementById('addUserName').value.trim();
+    const email = document.getElementById('addUserEmail').value.trim();
+    const role = document.getElementById('addUserRole').value;
+    const password = document.getElementById('addUserPassword').value;
+    const messageDiv = document.getElementById('addUserMessage');
+    messageDiv.textContent = '';
+    messageDiv.className = '';
+    if (!name || !email || !role || !password) {
+        messageDiv.textContent = 'Заполните все поля';
+        messageDiv.className = 'alert alert-danger';
+        return;
+    }
+    if (password.length < 6) {
+        messageDiv.textContent = 'Пароль должен быть не короче 6 символов';
+        messageDiv.className = 'alert alert-danger';
+        return;
+    }
+    try {
+        showLoader();
+        const response = await fetchWithTimeout('/api/users', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ name, email, role, password })
+        });
+        const result = await response.json();
+        if (!response.ok) {
+            throw new Error(result.error || 'Ошибка добавления пользователя');
+        }
+        messageDiv.textContent = 'Пользователь успешно добавлен!';
+        messageDiv.className = 'alert alert-success';
+        setTimeout(() => {
+            closeChangePasswordModal();
+            showUsersListPage();
+        }, 1000);
+    } catch (error) {
+        messageDiv.textContent = error.message || 'Ошибка добавления пользователя';
+        messageDiv.className = 'alert alert-danger';
+    } finally {
+        hideLoader();
+    }
+}
+
+function openEditUserModal(userId) {
+    fetchWithTimeout(`/api/users`, {
+        headers: { 'Authorization': `Bearer ${authToken}` }
+    })
+    .then(res => res.json())
+    .then(users => {
+        const user = users.find(u => String(u.id) === String(userId));
+        if (!user) return;
+        const modal = document.getElementById('changePasswordModal');
+        const modalBody = document.getElementById('changePasswordModalBody');
+        modal.classList.remove('hidden');
+        modalBody.innerHTML = `
+            <form id="editUserForm" class="change-password-form">
+                <div class="form-group">
+                    <label for="editUserName">Имя</label>
+                    <input type="text" id="editUserName" class="form-control" required value="${escapeHtml(user.name)}">
+                </div>
+                <div class="form-group">
+                    <label for="editUserEmail">Email</label>
+                    <input type="email" id="editUserEmail" class="form-control" required value="${escapeHtml(user.email)}">
+                </div>
+                <div class="form-group">
+                    <label for="editUserRole">Роль</label>
+                    <select id="editUserRole" class="form-control" required>
+                        <option value="Администратор" ${user.role === 'Администратор' ? 'selected' : ''}>Администратор</option>
+                        <option value="Редактор" ${user.role === 'Редактор' ? 'selected' : ''}>Редактор</option>
+                        <option value="Гость" ${user.role === 'Гость' ? 'selected' : ''}>Гость</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+                <div id="editUserMessage" style="margin-top:10px;"></div>
+            </form>
+        `;
+        document.getElementById('editUserForm').addEventListener('submit', (e) => handleEditUserSubmit(e, userId));
+        document.getElementById('closeChangePasswordModal').onclick = closeChangePasswordModal;
+        modal.querySelector('.modal-backdrop').onclick = closeChangePasswordModal;
+    });
+}
+
+async function handleEditUserSubmit(e, userId) {
+    e.preventDefault();
+    const name = document.getElementById('editUserName').value.trim();
+    const email = document.getElementById('editUserEmail').value.trim();
+    const role = document.getElementById('editUserRole').value;
+    const messageDiv = document.getElementById('editUserMessage');
+    messageDiv.textContent = '';
+    messageDiv.className = '';
+    if (!name || !email || !role) {
+        messageDiv.textContent = 'Заполните все поля';
+        messageDiv.className = 'alert alert-danger';
+        return;
+    }
+    try {
+        showLoader();
+        const response = await fetchWithTimeout(`/api/users/${userId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ name, email, role })
+        });
+        const result = await response.json();
+        if (!response.ok) {
+            throw new Error(result.error || 'Ошибка изменения пользователя');
+        }
+        messageDiv.textContent = 'Данные пользователя обновлены!';
+        messageDiv.className = 'alert alert-success';
+        setTimeout(() => {
+            closeChangePasswordModal();
+            showUsersListPage();
+        }, 1000);
+    } catch (error) {
+        messageDiv.textContent = error.message || 'Ошибка изменения пользователя';
+        messageDiv.className = 'alert alert-danger';
+    } finally {
+        hideLoader();
+    }
+}
+
+async function deleteUser(userId) {
+    if (!confirm('Вы уверены, что хотите удалить пользователя?')) return;
+    try {
+        showLoader();
+        const response = await fetchWithTimeout(`/api/users/${userId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        if (!response.ok) {
+            const result = await response.json();
+            throw new Error(result.error || 'Ошибка удаления пользователя');
+        }
+        showUsersListPage();
+    } catch (error) {
+        alert(error.message || 'Ошибка удаления пользователя');
     } finally {
         hideLoader();
     }
