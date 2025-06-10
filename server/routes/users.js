@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
-const { authenticateToken, checkRole } = require('../utils/auth');
+const { authenticateToken, checkRole, hashPassword, comparePasswords } = require('../utils/auth');
 
 router.get('/', authenticateToken, async (req, res) => {
   try {
@@ -50,6 +50,33 @@ router.get('/me', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Пользователь не найден' });
     }
     res.json(users[0]);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.post('/change-password', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { oldPassword, newPassword } = req.body;
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ error: 'Необходимо указать старый и новый пароль' });
+    }
+    // Получаем текущий хэш пароля
+    const [users] = await pool.query('SELECT password FROM users WHERE id = ?', [userId]);
+    if (!users.length) {
+      return res.status(404).json({ error: 'Пользователь не найден' });
+    }
+    const user = users[0];
+    // Проверяем старый пароль
+    const isMatch = await comparePasswords(oldPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Старый пароль неверен' });
+    }
+    // Обновляем пароль
+    const hashedPassword = await hashPassword(newPassword);
+    await pool.query('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, userId]);
+    res.json({ success: true, message: 'Пароль успешно изменён' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
