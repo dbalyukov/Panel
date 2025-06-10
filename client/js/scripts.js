@@ -339,11 +339,46 @@ function showSection(section) {
             break;
         case 'settings':
             pageTitle.textContent = 'Настройки';
-            dynamicContent.innerHTML = '<p>Раздел "Настройки" в разработке.</p>';
+            loadAndRenderUserSettings();
             break;
         default:
             pageTitle.textContent = 'Панель управления';
             dynamicContent.innerHTML = '<p>Добро пожаловать в панель управления!</p>';
+    }
+}
+
+async function loadAndRenderUserSettings() {
+    const dynamicContent = document.getElementById('dynamicContent');
+    try {
+        showLoader();
+        const response = await fetchWithTimeout('/api/users/me', {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        if (!response.ok) {
+            if (response.status === 401) {
+                handleLogout();
+                throw new Error('Сессия истекла. Пожалуйста, войдите снова.');
+            }
+            throw new Error(await response.text());
+        }
+        const user = await response.json();
+        dynamicContent.innerHTML = `
+            <div class="card">
+                <div class="card-title">Профиль пользователя</div>
+                <div class="form-group"><strong>ID:</strong> ${escapeHtml(String(user.id))}</div>
+                <div class="form-group"><strong>Имя:</strong> ${escapeHtml(user.name)}</div>
+                <div class="form-group"><strong>Email:</strong> ${escapeHtml(user.email)}</div>
+                <div class="form-group"><strong>Роль:</strong> ${escapeHtml(user.role)}</div>
+                <div class="form-group"><strong>Создан:</strong> ${escapeHtml(new Date(user.created_at).toLocaleString())}</div>
+                <div class="form-group"><strong>Обновлён:</strong> ${escapeHtml(new Date(user.updated_at).toLocaleString())}</div>
+            </div>
+        `;
+    } catch (error) {
+        dynamicContent.innerHTML = `<div class="alert alert-danger">${escapeHtml(error.message || 'Ошибка загрузки данных пользователя')}</div>`;
+    } finally {
+        hideLoader();
     }
 }
 
