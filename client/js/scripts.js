@@ -367,12 +367,26 @@ async function loadAndRenderUserSettings() {
         dynamicContent.innerHTML = `
             <div class="card">
                 <div class="card-title">Профиль пользователя</div>
-                <div class="form-group"><strong>ID:</strong> ${escapeHtml(String(user.id))}</div>
-                <div class="form-group"><strong>Имя:</strong> ${escapeHtml(user.name)}</div>
-                <div class="form-group"><strong>Email:</strong> ${escapeHtml(user.email)}</div>
-                <div class="form-group"><strong>Роль:</strong> ${escapeHtml(user.role)}</div>
-                <div class="form-group"><strong>Создан:</strong> ${escapeHtml(new Date(user.created_at).toLocaleString())}</div>
-                <div class="form-group"><strong>Обновлён:</strong> ${escapeHtml(new Date(user.updated_at).toLocaleString())}</div>
+                <table class="user-profile-table">
+                  <thead>
+                    <tr>
+                      <th>Имя</th>
+                      <th>Email</th>
+                      <th>Роль</th>
+                      <th>Создан</th>
+                      <th>Обновлён</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>${escapeHtml(user.name)}</td>
+                      <td>${escapeHtml(user.email)}</td>
+                      <td>${escapeHtml(user.role)}</td>
+                      <td>${escapeHtml(new Date(user.created_at).toLocaleString())}</td>
+                      <td>${escapeHtml(new Date(user.updated_at).toLocaleString())}</td>
+                    </tr>
+                  </tbody>
+                </table>
             </div>
         `;
     } catch (error) {

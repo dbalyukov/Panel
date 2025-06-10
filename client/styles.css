@@ -678,3 +678,32 @@ body {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+.user-profile-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    overflow: hidden;
+    margin-top: 12px;
+}
+.user-profile-table th, .user-profile-table td {
+    padding: 14px 16px;
+    text-align: left;
+}
+.user-profile-table th {
+    background: #f7f8fa;
+    font-weight: 600;
+    color: #222;
+    border-bottom: 1px solid #ececec;
+}
+.user-profile-table td {
+    background: #fff;
+    color: #222;
+    border-bottom: 1px solid #f2f2f2;
+}
+.user-profile-table tr:last-child td {
+    border-bottom: none;
+}
