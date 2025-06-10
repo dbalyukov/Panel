@@ -1119,12 +1119,15 @@ body {
     position: absolute;
     right: 0;
     bottom: 0;
-    width: 80px;
-    height: 60px;
-    background: linear-gradient(135deg, var(--pattern-purple) 60%, var(--pattern-orange) 100%);
-    border-radius: 0 0 60px 0;
-    opacity: 0.7;
+    width: 90px;
+    height: 90px;
+    background: radial-gradient(circle at 100% 100%, rgba(124,58,237,0.85) 0%, rgba(255,77,24,0.7) 60%, rgba(255,77,24,0.0) 100%);
+    border-radius: 0 0 90px 0;
+    opacity: 0.85;
     z-index: 0;
+    pointer-events: none;
+    transition: background 0.3s;
+    filter: blur(0.5px);
 }
 .card, .dashboard-block, .clusters-list-block, .empty-cluster-block {
     position: relative;
