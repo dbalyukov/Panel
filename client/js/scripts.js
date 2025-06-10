@@ -15,7 +15,6 @@ const loginBtn = document.getElementById('loginBtn');
 const authError = document.getElementById('authError');
 const usersTableBody = document.getElementById('usersTableBody');
 const addUserBtn = document.getElementById('addUserBtn');
-const logoutBtn = document.getElementById('logoutBtn');
 const userMenuBtn = document.getElementById('userMenuBtn');
 const userDropdown = document.getElementById('userDropdown');
 
@@ -185,7 +184,6 @@ function renderUsers(users) {
 
 function setupEventListeners() {
     loginBtn.addEventListener('click', handleLogin);
-    if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
     if (addUserBtn) addUserBtn.addEventListener('click', handleAddUser);
     if (usersTableBody) {
         usersTableBody.addEventListener('click', (e) => {
@@ -207,6 +205,15 @@ function setupEventListeners() {
             userDropdown.classList.remove('show');
         }
     });
+    // Делегируем клик по кнопке выхода
+    if (userDropdown) {
+        userDropdown.addEventListener('click', (e) => {
+            if (e.target.closest('#logoutBtn')) {
+                handleLogout();
+                userDropdown.classList.remove('show');
+            }
+        });
+    }
 }
 
 function handleAddUser() {

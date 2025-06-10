@@ -217,6 +217,7 @@ body {
 }
 
 .user-dropdown {
+    display: none !important;
     position: absolute;
     top: 100%;
     right: 0;
@@ -225,12 +226,11 @@ body {
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     min-width: 160px;
-    display: none;
     z-index: 1000;
 }
 
 .user-dropdown.show {
-    display: block;
+    display: block !important;
 }
 
 .dropdown-item {
