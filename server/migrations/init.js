@@ -1,3 +1,4 @@
+require('dotenv').config();
 const pool = require('../db');
 const { hashPassword } = require('../utils/auth');
 

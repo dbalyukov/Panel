@@ -26,6 +26,7 @@ let authToken = localStorage.getItem('authToken');
 document.addEventListener('DOMContentLoaded', () => {
     checkAuthState();
     setupEventListeners();
+    setupSidebarNavigation();
 });
 
 // ==================== АВТОРИЗАЦИЯ ====================
@@ -67,7 +68,7 @@ async function handleLogin() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ email: login, password })
+            body: JSON.stringify({ login, password })
         });
 
         if (!response.ok) {
@@ -98,7 +99,6 @@ function handleLogout() {
 function checkAuthState() {
     if (authToken) {
         showAppContent();
-        loadAndRenderUsers();
     } else {
         showAuthForm();
     }
@@ -155,6 +155,7 @@ async function fetchUsers() {
 }
 
 function renderUsers(users) {
+    if (!usersTableBody) return;
     usersTableBody.innerHTML = '';
     const fragment = document.createDocumentFragment();
 
@@ -184,12 +185,12 @@ function setupEventListeners() {
     loginBtn.addEventListener('click', handleLogin);
     if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
     if (addUserBtn) addUserBtn.addEventListener('click', handleAddUser);
-    
-    // Делегирование событий для таблицы
-    usersTableBody.addEventListener('click', (e) => {
-        if (e.target.classList.contains('btn-edit')) handleEdit(e);
-        if (e.target.classList.contains('btn-delete')) handleDelete(e);
-    });
+    if (usersTableBody) {
+        usersTableBody.addEventListener('click', (e) => {
+            if (e.target.classList.contains('btn-edit')) handleEdit(e);
+            if (e.target.classList.contains('btn-delete')) handleDelete(e);
+        });
+    }
 }
 
 function handleAddUser() {
@@ -261,4 +262,64 @@ function showError(message) {
     if (card) card.prepend(errorElement);
     
     setTimeout(() => errorElement.remove(), 5000);
+}
+
+// ==================== НАВИГАЦИЯ ПО РАЗДЕЛАМ ====================
+
+function setupSidebarNavigation() {
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const section = item.getAttribute('data-section');
+            showSection(section);
+        });
+    });
+}
+
+function showSection(section) {
+    const pageTitle = document.getElementById('pageTitle');
+    const dynamicContent = document.getElementById('dynamicContent');
+    switch (section) {
+        case 'dashboard':
+            pageTitle.textContent = 'Панель управления';
+            dynamicContent.innerHTML = '<p>Добро пожаловать в панель управления!</p>';
+            loadAndRenderUsers();
+            break;
+        case 'infrastructure':
+            pageTitle.textContent = 'Виртуальная инфраструктура';
+            dynamicContent.innerHTML = '<p>Раздел "Виртуальная инфраструктура" в разработке.</p>';
+            break;
+        case 'databases':
+            pageTitle.textContent = 'Базы данных';
+            dynamicContent.innerHTML = '<p>Раздел "Базы данных" в разработке.</p>';
+            break;
+        case 'storage':
+            pageTitle.textContent = 'Объектное хранилище';
+            dynamicContent.innerHTML = '<p>Раздел "Объектное хранилище" в разработке.</p>';
+            break;
+        case 'waf':
+            pageTitle.textContent = 'WAF';
+            dynamicContent.innerHTML = '<p>Раздел "WAF" в разработке.</p>';
+            break;
+        case 'ddos':
+            pageTitle.textContent = 'Защита от DDoS';
+            dynamicContent.innerHTML = '<p>Раздел "Защита от DDoS" в разработке.</p>';
+            break;
+        case 'balancers':
+            pageTitle.textContent = 'Балансировщики нагрузки';
+            dynamicContent.innerHTML = '<p>Раздел "Балансировщики нагрузки" в разработке.</p>';
+            break;
+        case 'monitoring':
+            pageTitle.textContent = 'Мониторинг';
+            dynamicContent.innerHTML = '<p>Раздел "Мониторинг" в разработке.</p>';
+            break;
+        case 'settings':
+            pageTitle.textContent = 'Настройки';
+            dynamicContent.innerHTML = '<p>Раздел "Настройки" в разработке.</p>';
+            break;
+        default:
+            pageTitle.textContent = 'Панель управления';
+            dynamicContent.innerHTML = '<p>Добро пожаловать в панель управления!</p>';
+    }
 }
