@@ -16,6 +16,8 @@ const authError = document.getElementById('authError');
 const usersTableBody = document.getElementById('usersTableBody');
 const addUserBtn = document.getElementById('addUserBtn');
 const logoutBtn = document.getElementById('logoutBtn');
+const userMenuBtn = document.getElementById('userMenuBtn');
+const userDropdown = document.getElementById('userDropdown');
 
 // Состояние приложения
 let currentEditId = null;
@@ -191,6 +193,20 @@ function setupEventListeners() {
             if (e.target.classList.contains('btn-delete')) handleDelete(e);
         });
     }
+    
+    // Обработчики для выпадающего меню
+    if (userMenuBtn) {
+        userMenuBtn.addEventListener('click', toggleUserDropdown);
+    }
+    
+    // Закрытие выпадающего меню при клике вне его
+    document.addEventListener('click', (e) => {
+        if (userDropdown && userDropdown.classList.contains('show') && 
+            !userDropdown.contains(e.target) && 
+            !userMenuBtn.contains(e.target)) {
+            userDropdown.classList.remove('show');
+        }
+    });
 }
 
 function handleAddUser() {
@@ -322,4 +338,9 @@ function showSection(section) {
             pageTitle.textContent = 'Панель управления';
             dynamicContent.innerHTML = '<p>Добро пожаловать в панель управления!</p>';
     }
+}
+
+function toggleUserDropdown(e) {
+    e.stopPropagation();
+    userDropdown.classList.toggle('show');
 }
