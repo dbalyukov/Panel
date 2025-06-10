@@ -437,19 +437,23 @@ async function showUsersListPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    ${users.map(u => `
+                    ${users.map(u => {
+                        const created = u.created_at ? formatDate(u.created_at) : '-';
+                        const updated = u.updated_at ? formatDate(u.updated_at) : '-';
+                        return `
                       <tr data-user-id="${u.id}">
                         <td>${escapeHtml(u.name)}</td>
                         <td>${escapeHtml(u.email)}</td>
                         <td>${escapeHtml(u.role)}</td>
-                        <td>${escapeHtml(new Date(u.created_at).toLocaleString())}</td>
-                        <td>${escapeHtml(new Date(u.updated_at).toLocaleString())}</td>
+                        <td>${created}</td>
+                        <td>${updated}</td>
                         <td>
                           <button class="btn btn-sm btn-edit-user">Изменить</button>
                           <button class="btn btn-sm btn-delete-user">Удалить</button>
                         </td>
                       </tr>
-                    `).join('')}
+                        `;
+                    }).join('')}
                   </tbody>
                 </table>
             </div>
@@ -742,4 +746,9 @@ async function handleChangePasswordSubmit(e) {
 function toggleUserDropdown(e) {
     e.stopPropagation();
     userDropdown.classList.toggle('show');
+}
+
+function formatDate(dateStr) {
+    const d = new Date(dateStr);
+    return isNaN(d) ? '-' : d.toLocaleString();
 }

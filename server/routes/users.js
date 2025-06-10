@@ -6,7 +6,7 @@ const { authenticateToken, checkRole, hashPassword, comparePasswords } = require
 router.get('/', authenticateToken, async (req, res) => {
   try {
     const [users] = await pool.query(`
-      SELECT id, name, email, role 
+      SELECT id, name, email, role, created_at, updated_at 
       FROM users 
       ORDER BY name
     `);
