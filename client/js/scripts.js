@@ -941,9 +941,9 @@ function renderClustersList() {
                         </tr>
                     </thead>
                     <tbody>
-                        ${clusters.map(c => `
+                        ${clusters.map((c, idx) => `
                             <tr>
-                                <td>${escapeHtml(c.name)}</td>
+                                <td><a href="#" class="cluster-link" data-cluster-idx="${idx}">${escapeHtml(c.name)}</a></td>
                                 <td>${escapeHtml(c.description || '')}</td>
                                 <td>Активен</td>
                             </tr>
@@ -953,6 +953,14 @@ function renderClustersList() {
             </div>
         `;
         document.getElementById('createClusterBtn').addEventListener('click', openCreateClusterModal);
+        // Добавляем обработчик нажатия на имя кластера
+        document.querySelectorAll('.cluster-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const idx = this.getAttribute('data-cluster-idx');
+                openClusterSettings(idx);
+            });
+        });
     }
 }
 
@@ -997,4 +1005,76 @@ function handleCreateClusterSubmit(e) {
     clusters.push({ name, description });
     closeChangePasswordModal();
     renderClustersList();
+}
+
+function openClusterSettings(clusterIdx) {
+    const cluster = clusters[clusterIdx];
+    const dynamicContent = document.getElementById('dynamicContent');
+    // Список вкладок
+    const tabs = [
+        { key: 'vms', label: 'Виртуальные машины', icon: 'fa-server' },
+        { key: 'dedicated', label: 'Выделенные серверы', icon: 'fa-database' },
+        { key: 'disks', label: 'Диски', icon: 'fa-hdd' },
+        { key: 'k8s', label: 'Managed Kubernetes', icon: 'fa-cubes' },
+        { key: 'ssh', label: 'Ключи SSH', icon: 'fa-key' },
+        { key: 'network', label: 'Сеть', icon: 'fa-network-wired' }
+    ];
+    let activeTab = 'vms';
+    renderClusterSettingsUI(cluster, tabs, activeTab, clusterIdx);
+}
+
+function renderClusterSettingsUI(cluster, tabs, activeTab, clusterIdx) {
+    const dynamicContent = document.getElementById('dynamicContent');
+    dynamicContent.innerHTML = `
+        <div class="cluster-settings-wrapper">
+            <div class="cluster-settings-sidebar">
+                <div class="cluster-settings-title">${escapeHtml(cluster.name)}</div>
+                <ul class="cluster-settings-menu">
+                    ${tabs.map(tab => `
+                        <li class="cluster-settings-menu-item${tab.key === activeTab ? ' active' : ''}" data-tab="${tab.key}">
+                            <i class="fas ${tab.icon}"></i> ${tab.label}
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+            <div class="cluster-settings-main">
+                ${renderClusterTabContent(activeTab, cluster)}
+            </div>
+        </div>
+    `;
+    // Навешиваем обработчики на вкладки
+    dynamicContent.querySelectorAll('.cluster-settings-menu-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const tab = this.getAttribute('data-tab');
+            renderClusterSettingsUI(cluster, tabs, tab, clusterIdx);
+        });
+    });
+}
+
+function renderClusterTabContent(tab, cluster) {
+    switch(tab) {
+        case 'vms':
+            return `
+                <div class="empty-cluster-block" style="box-shadow:none; margin:0; max-width:500px;">
+                    <div class="empty-cluster-illustration">
+                        <i class="fas fa-server fa-4x" style="color:#2F6BFF;"></i>
+                    </div>
+                    <div class="empty-cluster-title">Самое время создать первую виртуальную машину</div>
+                    <div class="empty-cluster-desc">Создайте свою первую виртуальную машину. Выбирайте подходящий образ, конфигурацию, сеть. Сделать это очень просто. В любом регионе.</div>
+                    <button class="btn btn-primary" style="margin-top:24px;">Создать виртуальную машину</button>
+                </div>
+            `;
+        case 'dedicated':
+            return `<div style="padding:32px;">Выделенные серверы: пока нет данных.</div>`;
+        case 'disks':
+            return `<div style="padding:32px;">Диски: пока нет данных.</div>`;
+        case 'k8s':
+            return `<div style="padding:32px;">Managed Kubernetes: пока нет данных.</div>`;
+        case 'ssh':
+            return `<div style="padding:32px;">Ключи SSH: пока нет данных.</div>`;
+        case 'network':
+            return `<div style="padding:32px;">Сеть: пока нет данных.</div>`;
+        default:
+            return '';
+    }
 }
