@@ -114,6 +114,7 @@ function showAuthForm() {
 function showAppContent() {
     authForm.classList.add('hidden');
     appContent.classList.remove('hidden');
+    showSection('dashboard');
 }
 
 function showAuthError(message) {
@@ -388,11 +389,10 @@ async function loadAndRenderUserSettings() {
                   </tbody>
                 </table>
                 <button class="btn btn-outline" id="showChangePasswordFormBtn" style="margin-top:20px;">Сменить пароль</button>
-                <div id="changePasswordFormContainer"></div>
             </div>
         `;
         // Навешиваем обработчик на кнопку смены пароля
-        document.getElementById('showChangePasswordFormBtn').addEventListener('click', renderChangePasswordForm);
+        document.getElementById('showChangePasswordFormBtn').addEventListener('click', openChangePasswordModal);
     } catch (error) {
         dynamicContent.innerHTML = `<div class="alert alert-danger">${escapeHtml(error.message || 'Ошибка загрузки данных пользователя')}</div>`;
     } finally {
@@ -400,9 +400,11 @@ async function loadAndRenderUserSettings() {
     }
 }
 
-function renderChangePasswordForm() {
-    const container = document.getElementById('changePasswordFormContainer');
-    container.innerHTML = `
+function openChangePasswordModal() {
+    const modal = document.getElementById('changePasswordModal');
+    const modalBody = document.getElementById('changePasswordModalBody');
+    modal.classList.remove('hidden');
+    modalBody.innerHTML = `
         <form id="changePasswordForm" class="change-password-form">
             <div class="form-group">
                 <label for="oldPassword">Старый пароль</label>
@@ -421,6 +423,14 @@ function renderChangePasswordForm() {
         </form>
     `;
     document.getElementById('changePasswordForm').addEventListener('submit', handleChangePasswordSubmit);
+    document.getElementById('closeChangePasswordModal').onclick = closeChangePasswordModal;
+    modal.querySelector('.modal-backdrop').onclick = closeChangePasswordModal;
+}
+
+function closeChangePasswordModal() {
+    const modal = document.getElementById('changePasswordModal');
+    modal.classList.add('hidden');
+    document.getElementById('changePasswordModalBody').innerHTML = '';
 }
 
 async function handleChangePasswordSubmit(e) {
@@ -459,6 +469,7 @@ async function handleChangePasswordSubmit(e) {
         messageDiv.textContent = 'Пароль успешно изменён!';
         messageDiv.className = 'alert alert-success';
         document.getElementById('changePasswordForm').reset();
+        setTimeout(closeChangePasswordModal, 1200);
     } catch (error) {
         messageDiv.textContent = error.message || 'Ошибка смены пароля';
         messageDiv.className = 'alert alert-danger';
