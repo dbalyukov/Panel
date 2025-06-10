@@ -22,6 +22,7 @@ const userDropdown = document.getElementById('userDropdown');
 let currentEditId = null;
 let editMode = false;
 let authToken = localStorage.getItem('authToken');
+let currentUser = null;
 
 // Инициализация при загрузке
 document.addEventListener('DOMContentLoaded', () => {
@@ -79,7 +80,9 @@ async function handleLogin() {
 
         const { token, user } = await response.json();
         authToken = token;
+        currentUser = user;
         localStorage.setItem('authToken', token);
+        localStorage.setItem('currentUser', JSON.stringify(user));
         showAppContent();
         await loadAndRenderUsers();
     } catch (error) {
@@ -93,12 +96,18 @@ async function handleLogin() {
 
 function handleLogout() {
     authToken = null;
+    currentUser = null;
     localStorage.removeItem('authToken');
+    localStorage.removeItem('currentUser');
     showAuthForm();
 }
 
 function checkAuthState() {
     if (authToken) {
+        const userStr = localStorage.getItem('currentUser');
+        if (userStr) {
+            try { currentUser = JSON.parse(userStr); } catch { currentUser = null; }
+        }
         showAppContent();
     } else {
         showAuthForm();
@@ -114,7 +123,21 @@ function showAuthForm() {
 function showAppContent() {
     authForm.classList.add('hidden');
     appContent.classList.remove('hidden');
+    updateUserHeader();
     showSection('dashboard');
+}
+
+function updateUserHeader() {
+    const userNameSpan = document.querySelector('.user-name');
+    const userAvatarDiv = document.getElementById('userMenuBtn');
+    if (!currentUser) return;
+    userNameSpan.textContent = currentUser.name;
+    userAvatarDiv.textContent = getInitials(currentUser.name);
+}
+
+function getInitials(name) {
+    if (!name) return '';
+    return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
 }
 
 function showAuthError(message) {
