@@ -39,6 +39,22 @@ router.post('/', authenticateToken, checkRole('Администратор'), asy
   }
 });
 
+router.get('/me', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const [users] = await pool.query(
+      `SELECT id, name, email, role, created_at, updated_at FROM users WHERE id = ?`,
+      [userId]
+    );
+    if (!users.length) {
+      return res.status(404).json({ error: 'Пользователь не найден' });
+    }
+    res.json(users[0]);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Другие методы (PUT, DELETE) аналогично...
 
 module.exports = router;
