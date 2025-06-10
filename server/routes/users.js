@@ -106,6 +106,17 @@ router.put('/:id', authenticateToken, checkRole('Администратор'), a
   }
 });
 
-// Другие методы (PUT, DELETE) аналогично...
+router.delete('/:id', authenticateToken, checkRole('Администратор'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [result] = await pool.query('DELETE FROM users WHERE id = ?', [id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Пользователь не найден' });
+    }
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 module.exports = router;
