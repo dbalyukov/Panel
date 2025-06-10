@@ -82,6 +82,30 @@ router.post('/change-password', authenticateToken, async (req, res) => {
   }
 });
 
+router.put('/:id', authenticateToken, checkRole('Администратор'), async (req, res) => {
+  try {
+    const { name, email, role } = req.body;
+    const { id } = req.params;
+    if (!name || !email || !role) {
+      return res.status(400).json({ error: 'Заполните все поля' });
+    }
+    await pool.query(
+      'UPDATE users SET name = ?, email = ?, role = ? WHERE id = ?',
+      [name, email, role, id]
+    );
+    const [updatedUser] = await pool.query(
+      'SELECT id, name, email, role, created_at, updated_at FROM users WHERE id = ?',
+      [id]
+    );
+    if (!updatedUser.length) {
+      return res.status(404).json({ error: 'Пользователь не найден' });
+    }
+    res.json(updatedUser[0]);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Другие методы (PUT, DELETE) аналогично...
 
 module.exports = router;
