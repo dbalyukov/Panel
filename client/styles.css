@@ -817,3 +817,60 @@ body {
     margin-bottom: 8px;
     text-align: center;
 }
+
+/* === Dashboard Styles === */
+.dashboard-block {
+    background: var(--bg-white);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    padding: 32px 24px 32px 24px;
+    margin: 32px auto 0 auto;
+    max-width: 1100px;
+}
+.dashboard-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    justify-content: flex-start;
+}
+.dashboard-card {
+    background: var(--bg-gray);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(47,107,255,0.04);
+    padding: 20px 24px 16px 24px;
+    min-width: 220px;
+    flex: 1 1 220px;
+    max-width: 260px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+.dashboard-card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.dashboard-card-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+.dashboard-card-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+@media (max-width: 900px) {
+    .dashboard-cards {
+        flex-direction: column;
+        gap: 16px;
+    }
+    .dashboard-card {
+        max-width: 100%;
+        min-width: 0;
+    }
+}

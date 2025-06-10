@@ -330,7 +330,48 @@ function showSection(section) {
     switch (section) {
         case 'dashboard':
             pageTitle.textContent = 'Панель управления';
-            dynamicContent.innerHTML = '<p>Добро пожаловать в панель управления!</p>';
+            dynamicContent.innerHTML = `
+                <div class="dashboard-block">
+                    <h2 style="margin-bottom: 24px;">Обзор ресурсов</h2>
+                    <div class="dashboard-cards">
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-title"><i class='fas fa-server'></i> Виртуальные машины</div>
+                            <div class="dashboard-card-value">3 кластера, 12 VM</div>
+                            <div class="dashboard-card-desc">CPU: 24 vCPU, RAM: 96 ГБ, Диск: 2 ТБ</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-title"><i class='fas fa-database'></i> Базы данных</div>
+                            <div class="dashboard-card-value">2 кластера</div>
+                            <div class="dashboard-card-desc">CPU: 8 vCPU, RAM: 32 ГБ, Диск: 500 ГБ</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-title"><i class='fas fa-hdd'></i> Объектное хранилище</div>
+                            <div class="dashboard-card-value">1 бакет</div>
+                            <div class="dashboard-card-desc">Использовано: 120 ГБ из 1 ТБ</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-title"><i class='fas fa-shield-alt'></i> WAF</div>
+                            <div class="dashboard-card-value">1 активный</div>
+                            <div class="dashboard-card-desc">Защищено: 2 сайта</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-title"><i class='fas fa-bolt'></i> DDoS</div>
+                            <div class="dashboard-card-value">Включено</div>
+                            <div class="dashboard-card-desc">Последняя атака: 2 дня назад</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-title"><i class='fas fa-network-wired'></i> Балансировщики</div>
+                            <div class="dashboard-card-value">1 балансировщик</div>
+                            <div class="dashboard-card-desc">Трафик: 120 Мбит/с</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-title"><i class='fas fa-chart-line'></i> Мониторинг</div>
+                            <div class="dashboard-card-value">Активен</div>
+                            <div class="dashboard-card-desc">Последний инцидент: 5 дней назад</div>
+                        </div>
+                    </div>
+                </div>
+            `;
             loadAndRenderUsers();
             break;
         case 'infrastructure':
@@ -341,7 +382,7 @@ function showSection(section) {
                         <i class="fas fa-server fa-4x" style="color:#2F6BFF;"></i>
                     </div>
                     <div class="empty-cluster-title">У вас еще нет ни одного кластера виртуальных машин</div>
-                    <div class="empty-cluster-desc">Загрузите свой первый кластер виртуальных машин. В любом регионе.</div>
+                    <div class="empty-cluster-desc">Создайте свой первый кластер виртуальных машин. В любом регионе.</div>
                     <button class="btn btn-primary" id="createClusterBtn" style="margin-top:24px;">Создать кластер</button>
                 </div>
             `;
@@ -354,27 +395,99 @@ function showSection(section) {
             break;
         case 'databases':
             pageTitle.textContent = 'Базы данных';
-            dynamicContent.innerHTML = '<p>Раздел "Базы данных" в разработке.</p>';
+            dynamicContent.innerHTML = `
+                <div class="empty-cluster-block">
+                    <div class="empty-cluster-illustration">
+                        <i class="fas fa-database fa-4x" style="color:#2F6BFF;"></i>
+                    </div>
+                    <div class="empty-cluster-title">У вас еще нет ни одной базы данных</div>
+                    <div class="empty-cluster-desc">Создайте свой первый кластер баз данных. В любом регионе.</div>
+                    <button class="btn btn-primary" id="createDbClusterBtn" style="margin-top:24px;">Создать кластер</button>
+                </div>
+            `;
+            document.getElementById('createDbClusterBtn').addEventListener('click', () => {
+                showCreateClusterPage();
+            });
             break;
         case 'storage':
             pageTitle.textContent = 'Объектное хранилище';
-            dynamicContent.innerHTML = '<p>Раздел "Объектное хранилище" в разработке.</p>';
+            dynamicContent.innerHTML = `
+                <div class="empty-cluster-block">
+                    <div class="empty-cluster-illustration">
+                        <i class="fas fa-hdd fa-4x" style="color:#2F6BFF;"></i>
+                    </div>
+                    <div class="empty-cluster-title">У вас еще нет ни одного бакета</div>
+                    <div class="empty-cluster-desc">Создайте свой первый бакет для хранения объектов.</div>
+                    <button class="btn btn-primary" id="createStorageBtn" style="margin-top:24px;">Создать бакет</button>
+                </div>
+            `;
+            document.getElementById('createStorageBtn').addEventListener('click', () => {
+                showCreateClusterPage();
+            });
             break;
         case 'waf':
             pageTitle.textContent = 'WAF';
-            dynamicContent.innerHTML = '<p>Раздел "WAF" в разработке.</p>';
+            dynamicContent.innerHTML = `
+                <div class="empty-cluster-block">
+                    <div class="empty-cluster-illustration">
+                        <i class="fas fa-shield-alt fa-4x" style="color:#2F6BFF;"></i>
+                    </div>
+                    <div class="empty-cluster-title">У вас еще нет ни одной WAF-конфигурации</div>
+                    <div class="empty-cluster-desc">Создайте свою первую WAF-конфигурацию для защиты приложений.</div>
+                    <button class="btn btn-primary" id="createWafBtn" style="margin-top:24px;">Создать WAF</button>
+                </div>
+            `;
+            document.getElementById('createWafBtn').addEventListener('click', () => {
+                showCreateClusterPage();
+            });
             break;
         case 'ddos':
             pageTitle.textContent = 'Защита от DDoS';
-            dynamicContent.innerHTML = '<p>Раздел "Защита от DDoS" в разработке.</p>';
+            dynamicContent.innerHTML = `
+                <div class="empty-cluster-block">
+                    <div class="empty-cluster-illustration">
+                        <i class="fas fa-bolt fa-4x" style="color:#2F6BFF;"></i>
+                    </div>
+                    <div class="empty-cluster-title">У вас еще нет ни одной активной защиты от DDoS</div>
+                    <div class="empty-cluster-desc">Создайте первую стратегию защиты от DDoS для ваших сервисов.</div>
+                    <button class="btn btn-primary" id="createDdosBtn" style="margin-top:24px;">Создать стратегию</button>
+                </div>
+            `;
+            document.getElementById('createDdosBtn').addEventListener('click', () => {
+                showCreateClusterPage();
+            });
             break;
         case 'balancers':
             pageTitle.textContent = 'Балансировщики нагрузки';
-            dynamicContent.innerHTML = '<p>Раздел "Балансировщики нагрузки" в разработке.</p>';
+            dynamicContent.innerHTML = `
+                <div class="empty-cluster-block">
+                    <div class="empty-cluster-illustration">
+                        <i class="fas fa-network-wired fa-4x" style="color:#2F6BFF;"></i>
+                    </div>
+                    <div class="empty-cluster-title">У вас еще нет ни одного балансировщика</div>
+                    <div class="empty-cluster-desc">Создайте свой первый балансировщик нагрузки для распределения трафика.</div>
+                    <button class="btn btn-primary" id="createBalancerBtn" style="margin-top:24px;">Создать балансировщик</button>
+                </div>
+            `;
+            document.getElementById('createBalancerBtn').addEventListener('click', () => {
+                showCreateClusterPage();
+            });
             break;
         case 'monitoring':
             pageTitle.textContent = 'Мониторинг';
-            dynamicContent.innerHTML = '<p>Раздел "Мониторинг" в разработке.</p>';
+            dynamicContent.innerHTML = `
+                <div class="empty-cluster-block">
+                    <div class="empty-cluster-illustration">
+                        <i class="fas fa-chart-line fa-4x" style="color:#2F6BFF;"></i>
+                    </div>
+                    <div class="empty-cluster-title">У вас еще нет ни одной метрики мониторинга</div>
+                    <div class="empty-cluster-desc">Создайте первую метрику для отслеживания состояния сервисов.</div>
+                    <button class="btn btn-primary" id="createMonitoringBtn" style="margin-top:24px;">Создать метрику</button>
+                </div>
+            `;
+            document.getElementById('createMonitoringBtn').addEventListener('click', () => {
+                showCreateClusterPage();
+            });
             break;
         case 'settings':
             pageTitle.textContent = 'Настройки';
