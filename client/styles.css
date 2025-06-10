@@ -1,14 +1,19 @@
 :root {
-    --primary: #2F6BFF;
-    --primary-hover: #1A5AFE;
-    --text-primary: #1A1A1A;
-    --text-secondary: #666666;
+    --primary: #7C3AED; /* Фиолетовый */
+    --primary-hover: #6A28D9;
+    --accent: #FF4D18; /* Оранжевый */
+    --dark: #232F4B; /* Тёмно-синий */
+    --text-primary: #232F4B;
+    --text-secondary: #7C3AED;
     --text-tertiary: #999999;
     --bg-white: #FFFFFF;
     --bg-gray: #F5F7FA;
+    --bg-dark: #232F4B;
     --border-color: #E0E0E0;
     --error: #FF4D4F;
     --success: #52C41A;
+    --pattern-purple: #7C3AED;
+    --pattern-orange: #FF4D18;
 }
 
 * {
@@ -311,7 +316,7 @@ body {
 .form-control:focus {
     outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 0 2px rgba(47, 107, 255, 0.2);
+    box-shadow: 0 0 0 2px rgba(124,58,237,0.08);
 }
 
 .form-select {
@@ -399,23 +404,32 @@ body {
 }
 
 .btn-primary {
-    background-color: var(--primary);
-    color: white;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 8px 8px 8px 0;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(124,58,237,0.08);
+    transition: background 0.2s, box-shadow 0.2s;
 }
 
 .btn-primary:hover {
-    background-color: var(--primary-hover);
+    background: var(--primary-hover);
+    box-shadow: 0 4px 16px rgba(124,58,237,0.12);
 }
 
 .btn-outline {
-    background-color: transparent;
-    border: 1px solid var(--border-color);
-    color: var(--text-secondary);
-    margin-right: 12px;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    background: #fff;
+    border-radius: 8px 8px 8px 0;
+    font-weight: 600;
+    transition: background 0.2s, color 0.2s;
 }
 
 .btn-outline:hover {
-    background-color: rgba(0, 0, 0, 0.02);
+    background: var(--primary);
+    color: #fff;
 }
 
 .form-actions {
@@ -1049,4 +1063,92 @@ body {
         padding-left: 8px;
         padding-right: 8px;
     }
+}
+
+/* === Глобальные стили для шапки и футера с паттерном-уголком === */
+.header, .footer {
+    position: relative;
+    background: var(--bg-white);
+    z-index: 1;
+}
+.header::after, .footer::before {
+    content: '';
+    position: absolute;
+    width: 180px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--pattern-purple) 60%, var(--pattern-orange) 100%);
+    border-radius: 0 0 80px 0;
+    right: 0;
+    top: 0;
+    z-index: 0;
+    opacity: 0.9;
+}
+.footer::before {
+    left: 0;
+    right: auto;
+    top: auto;
+    bottom: 0;
+    border-radius: 0 80px 0 0;
+}
+
+/* === Заголовки === */
+.page-title, .card-title, .cluster-settings-title, h2, h1 {
+    color: var(--primary);
+    font-family: 'Inter', 'Arial', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+/* === Иконки === */
+.sidebar i, .cluster-settings-menu-item i, .dashboard-card-title i, .empty-cluster-illustration i, .user-avatar, .user-dropdown i {
+    color: var(--primary) !important;
+}
+
+/* === Акценты и выделения === */
+.highlight, .alert-success {
+    background: var(--accent);
+    color: #fff;
+    border-radius: 8px 8px 8px 0;
+    padding: 2px 8px;
+    font-weight: 600;
+}
+
+/* === Паттерн-уголок для крупных блоков === */
+.card::after, .dashboard-block::after, .clusters-list-block::after, .empty-cluster-block::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 80px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--pattern-purple) 60%, var(--pattern-orange) 100%);
+    border-radius: 0 0 60px 0;
+    opacity: 0.7;
+    z-index: 0;
+}
+.card, .dashboard-block, .clusters-list-block, .empty-cluster-block {
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-white);
+}
+
+/* === Таблицы === */
+.user-profile-table th {
+    color: var(--primary);
+    font-weight: 600;
+    background: var(--bg-gray);
+}
+.user-profile-table td {
+    color: var(--dark);
+}
+
+/* === Ссылки === */
+a, .cluster-link {
+    color: var(--primary);
+    text-decoration: underline dotted;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+a:hover, .cluster-link:hover {
+    color: var(--accent);
 }
