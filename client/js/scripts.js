@@ -376,22 +376,7 @@ function showSection(section) {
             break;
         case 'infrastructure':
             pageTitle.textContent = 'Виртуальная инфраструктура';
-            dynamicContent.innerHTML = `
-                <div class="empty-cluster-block">
-                    <div class="empty-cluster-illustration">
-                        <i class="fas fa-server fa-4x" style="color:#2F6BFF;"></i>
-                    </div>
-                    <div class="empty-cluster-title">У вас еще нет ни одного кластера виртуальных машин</div>
-                    <div class="empty-cluster-desc">Создайте свой первый кластер виртуальных машин. В любом регионе.</div>
-                    <button class="btn btn-primary" id="createClusterBtn" style="margin-top:24px;">Создать кластер</button>
-                </div>
-            `;
-            const createBtn = document.getElementById('createClusterBtn');
-            if (createBtn) {
-                createBtn.addEventListener('click', () => {
-                    showCreateClusterPage();
-                });
-            }
+            renderClustersList();
             break;
         case 'databases':
             pageTitle.textContent = 'Базы данных';
@@ -921,4 +906,95 @@ function showCreateClusterPage() {
         </div>
     `;
     document.getElementById('backToInfraBtn').addEventListener('click', () => showSection('infrastructure'));
+}
+
+// Массив для хранения кластеров (заглушка)
+let clusters = [];
+
+function renderClustersList() {
+    const dynamicContent = document.getElementById('dynamicContent');
+    if (clusters.length === 0) {
+        dynamicContent.innerHTML = `
+            <div class="empty-cluster-block">
+                <div class="empty-cluster-illustration">
+                    <i class="fas fa-server fa-4x" style="color:#2F6BFF;"></i>
+                </div>
+                <div class="empty-cluster-title">У вас еще нет ни одного кластера виртуальных машин</div>
+                <div class="empty-cluster-desc">Создайте свой первый кластер виртуальных машин. В любом регионе.</div>
+                <button class="btn btn-primary" id="createClusterBtn" style="margin-top:24px;">Создать кластер</button>
+            </div>
+        `;
+        document.getElementById('createClusterBtn').addEventListener('click', openCreateClusterModal);
+    } else {
+        dynamicContent.innerHTML = `
+            <div class="clusters-list-block">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+                    <h2 style="font-size:22px; font-weight:600;">Кластеры виртуальных машин</h2>
+                    <button class="btn btn-primary" id="createClusterBtn">Создать кластер</button>
+                </div>
+                <table class="user-profile-table">
+                    <thead>
+                        <tr>
+                            <th>Имя</th>
+                            <th>Описание</th>
+                            <th>Статус</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${clusters.map(c => `
+                            <tr>
+                                <td>${escapeHtml(c.name)}</td>
+                                <td>${escapeHtml(c.description || '')}</td>
+                                <td>Активен</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+        document.getElementById('createClusterBtn').addEventListener('click', openCreateClusterModal);
+    }
+}
+
+function openCreateClusterModal() {
+    const modal = document.getElementById('changePasswordModal');
+    const modalBody = document.getElementById('changePasswordModalBody');
+    modal.classList.remove('hidden');
+    modalBody.innerHTML = `
+        <form id="createClusterForm" class="change-password-form">
+            <div class="form-group">
+                <label for="clusterName">Название <span style='color:#FF4D4F'>*</span></label>
+                <input type="text" id="clusterName" class="form-control" required maxlength="64" placeholder="Введите название кластера">
+            </div>
+            <div class="form-group">
+                <label for="clusterDesc">Описание (опционально)</label>
+                <input type="text" id="clusterDesc" class="form-control" maxlength="128" placeholder="Описание кластера">
+            </div>
+            <div class="form-actions" style="margin-top:24px; display:flex; gap:12px; justify-content:flex-end;">
+                <button type="button" class="btn btn-outline" id="closeCreateClusterModal">Закрыть</button>
+                <button type="submit" class="btn btn-primary">Создать</button>
+            </div>
+            <div id="createClusterMessage" style="margin-top:10px;"></div>
+        </form>
+    `;
+    document.getElementById('closeCreateClusterModal').onclick = closeChangePasswordModal;
+    modal.querySelector('.modal-backdrop').onclick = closeChangePasswordModal;
+    document.getElementById('createClusterForm').addEventListener('submit', handleCreateClusterSubmit);
+}
+
+function handleCreateClusterSubmit(e) {
+    e.preventDefault();
+    const name = document.getElementById('clusterName').value.trim();
+    const description = document.getElementById('clusterDesc').value.trim();
+    const messageDiv = document.getElementById('createClusterMessage');
+    messageDiv.textContent = '';
+    messageDiv.className = '';
+    if (!name) {
+        messageDiv.textContent = 'Название обязательно для заполнения';
+        messageDiv.className = 'alert alert-danger';
+        return;
+    }
+    clusters.push({ name, description });
+    closeChangePasswordModal();
+    renderClustersList();
 }
