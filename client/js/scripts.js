@@ -227,26 +227,22 @@ function setupEventListeners() {
     }
     
     // Обработчики для выпадающего меню
-    if (userMenuBtn) {
-        userMenuBtn.addEventListener('click', toggleUserDropdown);
-    }
-    
-    // Закрытие выпадающего меню при клике вне его
-    document.addEventListener('click', (e) => {
-        if (userDropdown && userDropdown.classList.contains('show') && 
-            !userDropdown.contains(e.target) && 
-            !userMenuBtn.contains(e.target)) {
-            userDropdown.classList.remove('show');
-        }
-    });
-    // Делегируем клик по кнопке выхода
-    if (userDropdown) {
-        userDropdown.addEventListener('click', (e) => {
-            if (e.target.closest('#logoutBtn')) {
-                handleLogout();
+    if (userMenuBtn && userDropdown) {
+        userMenuBtn.onclick = function(e) {
+            e.stopPropagation();
+            userDropdown.classList.toggle('show');
+        };
+        document.addEventListener('click', function(e) {
+            if (!userDropdown.contains(e.target) && e.target !== userMenuBtn) {
                 userDropdown.classList.remove('show');
             }
         });
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.onclick = function() {
+                handleLogout();
+            };
+        }
     }
 }
 
@@ -892,11 +888,6 @@ async function handleChangePasswordSubmit(e) {
     } finally {
         hideLoader();
     }
-}
-
-function toggleUserDropdown(e) {
-    e.stopPropagation();
-    userDropdown.classList.toggle('show');
 }
 
 function formatDate(dateStr) {

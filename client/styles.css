@@ -165,6 +165,9 @@ body {
     margin: 0 auto;
     flex: 1;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
 }
 
 .summary-sidebar {
@@ -848,6 +851,7 @@ body {
     flex-wrap: wrap;
     gap: 24px;
     justify-content: flex-start;
+    align-items: stretch;
 }
 .dashboard-card {
     background: var(--bg-gray);
@@ -860,6 +864,8 @@ body {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    min-height: 110px;
+    box-sizing: border-box;
 }
 .dashboard-card-title {
     font-size: 15px;
@@ -880,26 +886,47 @@ body {
     font-size: 13px;
     color: var(--text-secondary);
 }
+@media (max-width: 1200px) {
+    .dashboard-cards {
+        gap: 16px;
+    }
+    .dashboard-card {
+        max-width: 48%;
+        min-width: 180px;
+    }
+}
 @media (max-width: 900px) {
     .dashboard-cards {
         flex-direction: column;
-        gap: 16px;
+        gap: 12px;
     }
     .dashboard-card {
         max-width: 100%;
         min-width: 0;
     }
+    .main-content {
+        padding: 12px 2vw;
+    }
+}
+.clusters-list-block, .empty-cluster-block {
+    width: 100%;
+    max-width: 1400px;
+    min-width: 0;
+    box-sizing: border-box;
+    margin: 0 auto;
+}
+@media (max-width: 700px) {
+    .clusters-list-block, .empty-cluster-block {
+        padding-left: 4px;
+        padding-right: 4px;
+    }
+    .dashboard-card {
+        padding: 12px 8px;
+        font-size: 14px;
+    }
 }
 
 /* === Clusters List Block Styles === */
-.clusters-list-block {
-    background: var(--bg-white);
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-    padding: 32px 24px 32px 24px;
-    margin: 48px auto 0 auto;
-    max-width: 900px;
-}
 .clusters-list-block h2 {
     margin: 0;
     font-size: 22px;
@@ -925,15 +952,6 @@ body {
 }
 .clusters-list-block tr:last-child td {
     border-bottom: none;
-}
-@media (max-width: 700px) {
-    .clusters-list-block, .clusters-list-block table {
-        padding: 8px;
-        font-size: 13px;
-    }
-    .clusters-list-block th, .clusters-list-block td {
-        padding: 8px 6px;
-    }
 }
 
 /* === Cluster Settings Styles === */
@@ -1039,29 +1057,6 @@ body {
 @media (max-width: 1200px) {
     .fixed-cluster-sidebar {
         margin-left: 0;
-    }
-}
-
-/* === Responsive Main Content === */
-.cluster-settings-wrapper,
-.clusters-list-block,
-.dashboard-block,
-.empty-cluster-block {
-    width: 100%;
-    max-width: 1400px;
-    min-width: 0;
-    box-sizing: border-box;
-}
-@media (max-width: 900px) {
-    .main-content {
-        padding: 12px 2vw;
-    }
-    .cluster-settings-wrapper,
-    .clusters-list-block,
-    .dashboard-block,
-    .empty-cluster-block {
-        padding-left: 8px;
-        padding-right: 8px;
     }
 }
 
