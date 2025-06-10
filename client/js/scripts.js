@@ -29,6 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
     checkAuthState();
     setupEventListeners();
     setupSidebarNavigation();
+    // Показываем user-menu явно при загрузке
+    const userMenu = document.querySelector('.user-menu');
+    if (userMenu) userMenu.style.display = 'flex';
 });
 
 // ==================== АВТОРИЗАЦИЯ ====================
@@ -124,13 +127,20 @@ function showAppContent() {
     authForm.classList.add('hidden');
     appContent.classList.remove('hidden');
     updateUserHeader();
+    // Показываем user-menu явно
+    const userMenu = document.querySelector('.user-menu');
+    if (userMenu) userMenu.style.display = 'flex';
     showSection('dashboard');
 }
 
 function updateUserHeader() {
     const userNameSpan = document.querySelector('.user-name');
     const userAvatarDiv = document.getElementById('userMenuBtn');
-    if (!currentUser) return;
+    if (!currentUser) {
+        userNameSpan.textContent = '';
+        userAvatarDiv.textContent = '';
+        return;
+    }
     userNameSpan.textContent = currentUser.name;
     userAvatarDiv.textContent = getInitials(currentUser.name);
 }
