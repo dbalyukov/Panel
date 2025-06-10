@@ -937,6 +937,7 @@ function renderClustersList() {
                         <tr>
                             <th>Имя</th>
                             <th>Описание</th>
+                            <th>Регион</th>
                             <th>Статус</th>
                         </tr>
                     </thead>
@@ -945,6 +946,7 @@ function renderClustersList() {
                             <tr>
                                 <td><a href="#" class="cluster-link" data-cluster-idx="${idx}">${escapeHtml(c.name)}</a></td>
                                 <td>${escapeHtml(c.description || '')}</td>
+                                <td>${escapeHtml(c.region || '')}</td>
                                 <td>Активен</td>
                             </tr>
                         `).join('')}
@@ -953,7 +955,6 @@ function renderClustersList() {
             </div>
         `;
         document.getElementById('createClusterBtn').addEventListener('click', openCreateClusterModal);
-        // Добавляем обработчик нажатия на имя кластера
         document.querySelectorAll('.cluster-link').forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -978,6 +979,14 @@ function openCreateClusterModal() {
                 <label for="clusterDesc">Описание (опционально)</label>
                 <input type="text" id="clusterDesc" class="form-control" maxlength="128" placeholder="Описание кластера">
             </div>
+            <div class="form-group">
+                <label for="clusterRegion">Регион</label>
+                <select id="clusterRegion" class="form-control">
+                    <option value="">Не выбран</option>
+                    <option value="Москва-1">Москва-1</option>
+                    <option value="Москва-2">Москва-2</option>
+                </select>
+            </div>
             <div class="form-actions" style="margin-top:24px; display:flex; gap:12px; justify-content:flex-end;">
                 <button type="button" class="btn btn-outline" id="closeCreateClusterModal">Закрыть</button>
                 <button type="submit" class="btn btn-primary">Создать</button>
@@ -994,6 +1003,7 @@ function handleCreateClusterSubmit(e) {
     e.preventDefault();
     const name = document.getElementById('clusterName').value.trim();
     const description = document.getElementById('clusterDesc').value.trim();
+    const region = document.getElementById('clusterRegion').value;
     const messageDiv = document.getElementById('createClusterMessage');
     messageDiv.textContent = '';
     messageDiv.className = '';
@@ -1002,7 +1012,7 @@ function handleCreateClusterSubmit(e) {
         messageDiv.className = 'alert alert-danger';
         return;
     }
-    clusters.push({ name, description });
+    clusters.push({ name, description, region });
     closeChangePasswordModal();
     renderClustersList();
 }
@@ -1010,7 +1020,6 @@ function handleCreateClusterSubmit(e) {
 function openClusterSettings(clusterIdx) {
     const cluster = clusters[clusterIdx];
     const dynamicContent = document.getElementById('dynamicContent');
-    // Список вкладок
     const tabs = [
         { key: 'vms', label: 'Виртуальные машины', icon: 'fa-server' },
         { key: 'dedicated', label: 'Выделенные серверы', icon: 'fa-database' },
@@ -1026,8 +1035,14 @@ function openClusterSettings(clusterIdx) {
 function renderClusterSettingsUI(cluster, tabs, activeTab, clusterIdx) {
     const dynamicContent = document.getElementById('dynamicContent');
     dynamicContent.innerHTML = `
-        <div class="cluster-settings-wrapper">
+        <div class="cluster-settings-wrapper fixed-cluster-sidebar">
             <div class="cluster-settings-sidebar">
+                <div class="cluster-region-select">
+                    <select id="clusterRegionSelect" class="form-control">
+                        <option value="Москва-1" ${cluster.region === 'Москва-1' ? 'selected' : ''}>Москва-1</option>
+                        <option value="Москва-2" ${cluster.region === 'Москва-2' ? 'selected' : ''}>Москва-2</option>
+                    </select>
+                </div>
                 <div class="cluster-settings-title">${escapeHtml(cluster.name)}</div>
                 <ul class="cluster-settings-menu">
                     ${tabs.map(tab => `
@@ -1042,6 +1057,11 @@ function renderClusterSettingsUI(cluster, tabs, activeTab, clusterIdx) {
             </div>
         </div>
     `;
+    // Обработчик смены региона
+    dynamicContent.querySelector('#clusterRegionSelect').addEventListener('change', function() {
+        cluster.region = this.value;
+        renderClusterSettingsUI(cluster, tabs, activeTab, clusterIdx);
+    });
     // Навешиваем обработчики на вкладки
     dynamicContent.querySelectorAll('.cluster-settings-menu-item').forEach(item => {
         item.addEventListener('click', function() {
