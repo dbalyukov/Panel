@@ -654,6 +654,11 @@ async function handleEditUserSubmit(e, userId) {
         }
         messageDiv.textContent = 'Данные пользователя обновлены!';
         messageDiv.className = 'alert alert-success';
+        if (currentUser && String(currentUser.id) === String(userId)) {
+            currentUser = result;
+            localStorage.setItem('currentUser', JSON.stringify(result));
+            updateUserHeader();
+        }
         setTimeout(() => {
             closeChangePasswordModal();
             showUsersListPage();
