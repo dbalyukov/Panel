@@ -335,7 +335,22 @@ function showSection(section) {
             break;
         case 'infrastructure':
             pageTitle.textContent = 'Виртуальная инфраструктура';
-            dynamicContent.innerHTML = '<p>Раздел "Виртуальная инфраструктура" в разработке.</p>';
+            dynamicContent.innerHTML = `
+                <div class="empty-cluster-block">
+                    <div class="empty-cluster-illustration">
+                        <i class="fas fa-server fa-4x" style="color:#2F6BFF;"></i>
+                    </div>
+                    <div class="empty-cluster-title">У вас еще нет ни одного кластера виртуальных машин</div>
+                    <div class="empty-cluster-desc">Загрузите свой первый кластер виртуальных машин. В любом регионе.</div>
+                    <button class="btn btn-primary" id="createClusterBtn" style="margin-top:24px;">Создать кластер</button>
+                </div>
+            `;
+            const createBtn = document.getElementById('createClusterBtn');
+            if (createBtn) {
+                createBtn.addEventListener('click', () => {
+                    showCreateClusterPage();
+                });
+            }
             break;
         case 'databases':
             pageTitle.textContent = 'Базы данных';
@@ -779,4 +794,18 @@ function toggleUserDropdown(e) {
 function formatDate(dateStr) {
     const d = new Date(dateStr);
     return isNaN(d) ? '-' : d.toLocaleString();
+}
+
+function showCreateClusterPage() {
+    const pageTitle = document.getElementById('pageTitle');
+    const dynamicContent = document.getElementById('dynamicContent');
+    pageTitle.textContent = 'Создание кластера';
+    dynamicContent.innerHTML = `
+        <div class="card">
+            <div class="card-title">Создание кластера</div>
+            <p>Здесь будет форма создания кластера. Требования к странице будут добавлены позже.</p>
+            <button class="btn btn-outline" id="backToInfraBtn" style="margin-top:20px;">Назад</button>
+        </div>
+    `;
+    document.getElementById('backToInfraBtn').addEventListener('click', () => showSection('infrastructure'));
 }
